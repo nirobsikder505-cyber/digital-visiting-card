@@ -3,102 +3,139 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bangla QR Card - ডিজিটাল কার্ড বানান</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <title>Bangla QR Card - ডিজিটাল ভিজিটিং কার্ড</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    body { font-family: 'Noto Sans Bengali', system-ui, sans-serif; }
-    .card { border: 2px solid #10b981; border-radius: 16px; }
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;700&display=swap');
+    body { font-family: 'Noto Sans Bengali', sans-serif; margin:0; background: linear-gradient(135deg, #e0f2f1, #f1f8e9); }
+    .container { max-width: 500px; margin: 20px auto; padding: 20px; background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    h1 { color: #00695c; text-align: center; }
+    input, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; }
+    button { width: 100%; padding: 16px; background: #00695c; color: white; border: none; border-radius: 12px; font-size: 18px; margin-top: 10px; cursor: pointer; }
+    .payment-box { background: #fff3e0; padding: 15px; border-radius: 12px; border: 2px solid #ff9800; margin: 15px 0; }
+    #preview { display: none; margin-top: 20px; padding: 20px; background: #f8f9fa; border-radius: 16px; border: 3px solid #00695c; }
   </style>
 </head>
-<body class="bg-gradient-to-br from-green-50 to-emerald-100 min-h-screen py-8">
-  <div class="max-w-4xl mx-auto px-4">
-    <h1 class="text-4xl font-bold text-center text-emerald-700 mb-2">বাংলা QR কার্ড</h1>
-    <p class="text-center text-gray-600 mb-8">আপনার ডিজিটাল ভিজিটিং কার্ড + QR কোড বানান ফ্রিতে</p>
+<body>
+  <div class="container">
+    <h1>বাংলা QR কার্ড</h1>
+    <p style="text-align:center; color:#555;">ডিজিটাল ভিজিটিং কার্ড + QR কোড (মাত্র ১৯৯ টাকা)</p>
 
-    <div class="grid md:grid-cols-2 gap-8">
-      <div class="bg-white p-6 rounded-2xl shadow-lg">
-        <form id="cardForm">
-          <div class="space-y-4">
-            <input type="text" id="name" placeholder="আপনার নাম" class="w-full p-3 border rounded-xl" required>
-            <input type="text" id="profession" placeholder="পেশা (যেমন: ফ্রিল্যান্সার)" class="w-full p-3 border rounded-xl">
-            <input type="tel" id="phone" placeholder="মোবাইল নাম্বার" class="w-full p-3 border rounded-xl" required>
-            <input type="email" id="email" placeholder="ইমেইল" class="w-full p-3 border rounded-xl">
-            <input type="text" id="address" placeholder="ঠিকানা" class="w-full p-3 border rounded-xl">
-            <input type="url" id="whatsapp" placeholder="WhatsApp লিংক (ঐচ্ছিক)" class="w-full p-3 border rounded-xl">
-            
-            <button type="button" onclick="generateCard()" 
-              class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-2xl font-semibold text-lg">
-              কার্ড + QR বানান
-            </button>
-          </div>
-        </form>
-      </div>
+    <input type="text" id="name" placeholder="আপনার নাম" required>
+    <input type="text" id="occupation" placeholder="পেশা (যেমন: ফ্রিল্যান্সার)">
+    <input type="tel" id="mobile" placeholder="মোবাইল নম্বর" required>
+    <input type="email" id="email" placeholder="ইমেইল">
+    <textarea id="address" rows="2" placeholder="ঠিকানা"></textarea>
+    <input type="url" id="whatsapp" placeholder="WhatsApp লিংক (অপশনাল)">
 
-      <div>
-        <div id="preview" class="card bg-white p-6 shadow-xl min-h-[380px] flex flex-col items-center justify-center text-center">
-          <p class="text-gray-400">ফর্ম পূরণ করে "কার্ড বানান" চাপুন</p>
-        </div>
-        
-        <div class="mt-6 flex gap-4">
-          <button onclick="downloadPDF()" id="downloadBtn" 
-            class="flex-1 bg-emerald-600 text-white py-3 rounded-2xl font-medium hidden">
-            PDF ডাউনলোড করুন
-          </button>
-          <button onclick="shareCard()" id="shareBtn"
-            class="flex-1 bg-blue-600 text-white py-3 rounded-2xl font-medium hidden">
-            শেয়ার করুন
-          </button>
-        </div>
-      </div>
+    <button onclick="showPayment()">১৯৯ টাকা দিয়ে কার্ড + QR নিন</button>
+
+    <!-- Payment Section -->
+    <div id="paymentSection" class="payment-box" style="display:none;">
+      <h3>বিকাশ পেমেন্ট</h3>
+      <p><strong>বিকাশ নাম্বার:</strong> 01787588369 (পার্সোনাল)</p>
+      <p><strong>টাকার পরিমাণ:</strong> ১৯৯ টাকা</p>
+      <p>টাকা পাঠিয়ে ট্রানজেকশন আইডি দিন:</p>
+      <input type="text" id="trxId" placeholder="ট্রানজেকশন আইডি লিখুন">
+      <button onclick="verifyPayment()" style="background:#ff9800;">ভেরিফাই করুন</button>
+    </div>
+
+    <!-- Card Preview -->
+    <div id="preview">
+      <h2 id="previewName" style="color:#00695c;"></h2>
+      <p id="previewOcc"></p>
+      <p id="previewMobile"></p>
+      <p id="previewEmail"></p>
+      <p id="previewAddr"></p>
+      <div id="qrcode" style="margin:15px auto;"></div>
+      
+      <button onclick="downloadPDF()" style="background:#d32f2f;">PDF ডাউনলোড</button>
+      <button onclick="shareCard()" style="background:#1976d2;">শেয়ার করুন</button>
     </div>
   </div>
 
   <script>
-    function generateCard() {
-      const name = document.getElementById('name').value || "আপনার নাম";
-      const profession = document.getElementById('profession').value || "পেশা";
-      const phone = document.getElementById('phone').value;
-      const email = document.getElementById('email').value;
-      const address = document.getElementById('address').value;
-      const whatsapp = document.getElementById('whatsapp').value;
+    let cardData = {};
 
-      let vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:\( {name}\nORG: \){profession}\nTEL:\( {phone}\nEMAIL: \){email}\nADR:${address}\nEND:VCARD`;
+    function showPayment() {
+      const name = document.getElementById('name').value.trim();
+      if (!name) return alert("নাম দিন!");
 
+      cardData = {
+        name: name,
+        occupation: document.getElementById('occupation').value,
+        mobile: document.getElementById('mobile').value,
+        email: document.getElementById('email').value,
+        address: document.getElementById('address').value,
+        whatsapp: document.getElementById('whatsapp').value
+      };
+
+      document.getElementById('paymentSection').style.display = 'block';
+    }
+
+    function verifyPayment() {
+      const trx = document.getElementById('trxId').value.trim();
+      if (!trx) return alert("ট্রানজেকশন আইডি দিন!");
+
+      alert("✅ ধন্যবাদ! পেমেন্ট যাচাই করা হচ্ছে। কার্ড তৈরি করা হচ্ছে...");
+
+      // Show card after "verification"
+      showCard();
+    }
+
+    function showCard() {
+      document.getElementById('paymentSection').style.display = 'none';
       const preview = document.getElementById('preview');
-      preview.innerHTML = `
-        <div class="w-full max-w-[320px] bg-white border-2 border-emerald-500 rounded-3xl p-6 shadow-md text-center">
-          <div class="text-2xl font-bold text-emerald-700 mb-1">${name}</div>
-          <div class="text-emerald-600 font-medium">${profession}</div>
-          <div class="my-6 flex justify-center" id="qrdiv"></div>
-          <div class="space-y-2 text-sm">
-            <div>📞 ${phone}</div>
-            ${email ? `<div>✉️ ${email}</div>` : ''}
-            ${address ? `<div>📍 ${address}</div>` : ''}
-          </div>
-        </div>
-      `;
+      preview.style.display = 'block';
 
-      setTimeout(() => {
-        QRCode.toCanvas(document.createElement('canvas'), vcard, { width: 180 }, function (error, canvas) {
-          if (error) console.error(error);
-          document.getElementById('qrdiv').appendChild(canvas);
-        });
-      }, 100);
+      document.getElementById('previewName').textContent = cardData.name;
+      document.getElementById('previewOcc').textContent = cardData.occupation;
+      document.getElementById('previewMobile').innerHTML = cardData.mobile ? `📱 ${cardData.mobile}` : '';
+      document.getElementById('previewEmail').innerHTML = cardData.email ? `✉️ ${cardData.email}` : '';
+      document.getElementById('previewAddr').innerHTML = cardData.address ? `📍 ${cardData.address}` : '';
 
-      document.getElementById('downloadBtn').classList.remove('hidden');
-      document.getElementById('shareBtn').classList.remove('hidden');
+      // Generate QR
+      document.getElementById('qrcode').innerHTML = '';
+      let vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${cardData.name}\n`;
+      if (cardData.occupation) vcard += `TITLE:${cardData.occupation}\n`;
+      if (cardData.mobile) vcard += `TEL:${cardData.mobile}\n`;
+      if (cardData.email) vcard += `EMAIL:${cardData.email}\n`;
+      if (cardData.address) vcard += `ADR:${cardData.address}\n`;
+      if (cardData.whatsapp) vcard += `URL:${cardData.whatsapp}\n`;
+      vcard += `END:VCARD`;
+
+      new QRCode(document.getElementById('qrcode'), {
+        text: vcard,
+        width: 240,
+        height: 240,
+        colorDark: "#00695c",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
     }
 
     function downloadPDF() {
-      const element = document.getElementById('preview');
-      html2pdf().from(element).save('My-Digital-Card.pdf');
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const name = cardData.name;
+      doc.setFontSize(24);
+      doc.text(name, 105, 30, { align: "center" });
+      let y = 50;
+      if (cardData.occupation) { doc.text(cardData.occupation, 105, y, { align: "center" }); y += 15; }
+      if (cardData.mobile) { doc.text("📱 " + cardData.mobile, 105, y, { align: "center" }); y += 15; }
+      if (cardData.email) { doc.text("✉️ " + cardData.email, 105, y, { align: "center" }); y += 15; }
+      if (cardData.address) doc.text("📍 " + cardData.address, 105, y, { align: "center" });
+
+      const qrCanvas = document.querySelector('#qrcode canvas');
+      if (qrCanvas) doc.addImage(qrCanvas.toDataURL(), 'PNG', 67, y + 20, 75, 75);
+
+      doc.save(name + '_Digital_Card.pdf');
     }
 
     function shareCard() {
-      alert("✅ লিংক কপি হয়েছে! (পরে শর্ট লিংক যোগ করা যাবে)");
+      alert("✅ কার্ড তৈরি হয়েছে! লিংক শেয়ার করুন বা স্ক্রিনশট নিন।");
     }
   </script>
 </body>
-              </html>
+</html>
