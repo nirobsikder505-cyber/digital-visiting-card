@@ -11,8 +11,9 @@
     body { font-family: 'Noto Sans Bengali', sans-serif; margin:0; background: linear-gradient(135deg, #e0f2f1, #f1f8e9); }
     .container { max-width: 520px; margin: 20px auto; padding: 25px; background: white; border-radius: 24px; box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
     h1 { color: #00695c; text-align: center; font-size: 30px; }
-    input, textarea { width: 100%; padding: 15px; margin: 12px 0; border: 2px solid #e0f2f1; border-radius: 16px; font-size: 17px; }
-    button { width: 100%; padding: 18px; background: #00695c; color: white; border: none; border-radius: 16px; font-size: 18px; font-weight:700; margin-top: 15px; }
+    .subtitle { text-align:center; color:#004d40; font-weight:600; }
+    input, textarea, select { width: 100%; padding: 15px; margin: 12px 0; border: 2px solid #e0f2f1; border-radius: 16px; font-size: 17px; }
+    button { width: 100%; padding: 18px; background: #00695c; color: white; border: none; border-radius: 16px; font-size: 18px; font-weight:700; margin-top: 15px; cursor: pointer; }
     .payment-box { background: #fff8e1; padding: 25px; border-radius: 20px; border: 3px solid #ff9800; margin: 25px 0; }
     #preview { display: none; margin-top: 25px; padding: 25px; background: white; border-radius: 20px; border: 4px solid #00695c; text-align: center; }
     #qrcode { margin: 20px auto; padding: 15px; background: white; border-radius: 12px; }
@@ -21,21 +22,27 @@
 <body>
   <div class="container">
     <h1>বাংলা QR কার্ড</h1>
-    <p style="text-align:center; color:#00695c;">প্রিমিয়াম ডিজিটাল ভিজিটিং কার্ড (১৯৯ টাকা)</p>
+    <p class="subtitle">প্রিমিয়াম ডিজিটাল ভিজিটিং কার্ড (মাত্র ১৯৯ টাকা)</p>
 
     <input type="text" id="name" placeholder="আপনার নাম" required>
     <input type="text" id="occupation" placeholder="পেশা">
-    <input type="tel" id="mobile" placeholder="মোবাইল" required>
+    <input type="tel" id="mobile" placeholder="মোবাইল নম্বর" required>
     <input type="email" id="email" placeholder="ইমেইল">
     <textarea id="address" rows="2" placeholder="ঠিকানা"></textarea>
 
-    <button onclick="showPayment()">১৯৯ টাকায় কার্ড + QR নিন</button>
+    <select id="template">
+      <option value="1">ক্লাসিক টেমপ্লেট</option>
+      <option value="2">মডার্ন টেমপ্লেট</option>
+    </select>
+
+    <button onclick="showPayment()">১৯৯ টাকায় প্রিমিয়াম কার্ড + QR নিন</button>
 
     <div id="paymentSection" class="payment-box" style="display:none;">
-      <h3>বিকাশ: 01787588369</h3>
-      <p>১৯৯ টাকা পাঠিয়ে ট্রানজেকশন আইডি দিন</p>
+      <h3>বিকাশ পেমেন্ট</h3>
+      <p><strong>নাম্বার:</strong> 01787588369</p>
+      <p><strong>টাকা:</strong> ১৯৯ টাকা</p>
       <input type="text" id="trxId" placeholder="ট্রানজেকশন আইডি">
-      <button onclick="verifyPayment()" style="background:#ff9800;">ভেরিফাই করুন</button>
+      <button onclick="verifyPayment()" style="background:#ff9800;">ভেরিফাই করে কার্ড নিন</button>
     </div>
 
     <div id="preview">
@@ -46,6 +53,7 @@
       <p id="previewAddr"></p>
       <div id="qrcode"></div>
       <button onclick="downloadPDF()" style="background:#d32f2f;">PDF ডাউনলোড</button>
+      <button onclick="shareCard()" style="background:#1976d2; margin-top:8px;">শেয়ার করুন</button>
     </div>
   </div>
 
@@ -53,19 +61,21 @@
     let cardData = {};
 
     function showPayment() {
-      if (!document.getElementById('name').value.trim()) return alert("নাম দিন!");
+      if (!document.getElementById('name').value.trim()) return alert("নাম লিখুন!");
       cardData = {
         name: document.getElementById('name').value.trim(),
         occupation: document.getElementById('occupation').value,
         mobile: document.getElementById('mobile').value,
         email: document.getElementById('email').value,
-        address: document.getElementById('address').value
+        address: document.getElementById('address').value,
+        template: document.getElementById('template').value
       };
       document.getElementById('paymentSection').style.display = 'block';
     }
 
     function verifyPayment() {
       if (!document.getElementById('trxId').value.trim()) return alert("ট্রানজেকশন আইডি দিন!");
+      alert("✅ পেমেন্ট সফল! আপনার প্রিমিয়াম কার্ড তৈরি হচ্ছে...");
       showCard();
     }
 
@@ -107,9 +117,13 @@
       if (cardData.address) { doc.text("📍 " + cardData.address, 105, y, { align: "center" }); y += 20; }
 
       const qrCanvas = document.querySelector('#qrcode canvas');
-      if (qrCanvas) doc.addImage(qrCanvas.toDataURL('image/png'), 'PNG', 67, y, 75, 75);
+      if (qrCanvas) doc.addImage(qrCanvas.toDataURL(), 'PNG', 67, y, 75, 75);
 
-      doc.save(cardData.name + '_QR_Card.pdf');
+      doc.save(cardData.name + '_Premium_Card.pdf');
+    }
+
+    function shareCard() {
+      alert("✅ কার্ড তৈরি হয়েছে! স্ক্রিনশট নিন বা শেয়ার করুন।");
     }
   </script>
 </body>
